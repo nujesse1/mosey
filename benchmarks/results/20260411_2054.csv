@@ -1,0 +1,3 @@
+task,category,tool,run,time_s,input_tok,output_tok,cost_usd,turns,accuracy,error
+simple_read,reading,weblens,1,4.4,38135,162,0.0398805,2,1.0,0
+simple_read,reading,chrome,1,7.1,38359,256,0.018853349999999998,2,1.0,0
