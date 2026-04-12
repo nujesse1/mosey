@@ -8,6 +8,7 @@ A web execution CLI for AI agents. Runs a browser (visible by default) and expos
 weblens navigate https://example.com   # opens browser, loads page → snapshot included
 weblens do e5                           # click element by ref → snapshot included
 weblens do e7 --value "hello"           # type into a field → snapshot included
+weblens do e9 --action hover            # hover over element → post-hover snapshot included
 weblens state                           # re-read page (only needed if page changed on its own)
 weblens diff                            # what changed since last command
 weblens session save my_session         # persist cookies for later
@@ -20,14 +21,22 @@ weblens stop                            # kill browser
 
 **Refs:** Every interactive element in the snapshot has a ref like `[e5]`. Use these with `weblens do e5` to interact. Elements marked `[?]` are visible but have no ref (poorly labeled in ARIA). Refs change on each page load — always use refs from the most recent snapshot.
 
-**Snapshots:** `weblens navigate` and `weblens do` both return a snapshot automatically. Example:
+**Snapshots:** `weblens navigate`, `weblens do`, and `weblens hover` all return a snapshot automatically. **Never call `weblens state` after `weblens do` or `weblens hover` — the response already contains the updated snapshot. Calling state immediately after is always redundant and wastes a turn.** Only use `weblens state` when the page changed on its own (e.g. polling, redirects, human activity).
+
+Example snapshot:
 ```
 [e3] link "More information" → https://www.iana.org/help/example-domains
 [e6] button "Submit"
 [?] textbox "Customer name"
+[img1] img "Avatar of Jane"
 h1 "Example Domain"
   text: This domain is for use in...
+[2 image elements — hover with: weblens hover <ref>]
 ```
+
+**Images:** Image elements appear in the snapshot with their ARIA ref. Use `weblens do <ref> --action hover` to reveal hover-triggered content (tooltips, overlays, dropdown reveals).
+
+**Counting elements:** After multi-step actions, always count elements by their refs in the snapshot — do not infer from click history. A run of identical elements will show `(×N total)` on the last entry.
 
 **Sessions:** Browser cookies/storage persist with `session save <name>`. Load them in any future conversation. Check `session list` at the start to see what's available.
 

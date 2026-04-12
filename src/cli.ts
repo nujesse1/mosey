@@ -73,10 +73,12 @@ program
   .description("Interact with an element by ref ID")
   .option("--value <text>", "Value to type/select")
   .option("--key <key>", "Keyboard key to press after action (e.g. Enter, Tab, Escape)")
-  .action(async (ref: string, opts: { value?: string; key?: string }) => {
+  .option("--action <type>", "Action to perform: hover (default: click)")
+  .action(async (ref: string, opts: { value?: string; key?: string; action?: string }) => {
     const body: any = { ref };
     if (opts.value !== undefined) body.value = opts.value;
     if (opts.key !== undefined) body.key = opts.key;
+    if (opts.action !== undefined) body.action = opts.action;
     const result = await request("POST", "/do", body);
     console.log(JSON.stringify(result, null, 2));
   });

@@ -3,7 +3,7 @@ import { mkdir, unlink, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
-const WEBLENS_DIR = join(homedir(), ".weblens");
+const WEBLENS_DIR = process.env.WEBLENS_DIR ?? join(homedir(), ".weblens");
 const DAEMON_FILE = join(WEBLENS_DIR, "daemon.json");
 const SESSIONS_DIR = join(WEBLENS_DIR, "sessions");
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
@@ -340,7 +340,7 @@ function setupPageListeners(p: Page) {
 
 function compactSnapshot(snapshot: string): string {
   // Flatten the YAML tree into a compact indexed list
-  // Only keep: interactive elements, headings, text content, URLs
+  // Only keep: interactive elements, images, headings, text content, URLs
   const INTERACTIVE = new Set([
     "link", "button", "textbox", "checkbox", "radio",
     "combobox", "searchbox", "switch", "slider", "spinbutton",
@@ -351,6 +351,7 @@ function compactSnapshot(snapshot: string): string {
   const lines = snapshot.split("\n");
   const output: string[] = [];
   let lastUrl: string | null = null;
+  let imgCount = 0;
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -396,6 +397,15 @@ function compactSnapshot(snapshot: string): string {
       continue;
     }
 
+    // Images — include with alt text using real ARIA ref
+    if (role === "img") {
+      const nameStr = name ? ` "${name.slice(0, 80)}"` : "";
+      const refStr = ref ? `[${ref}]` : "[?]";
+      imgCount++;
+      output.push(`${refStr} img${nameStr}`);
+      continue;
+    }
+
     // Headings — always include
     if (role === "heading") {
       const levelMatch = trimmed.match(/\[level=(\d)\]/);
@@ -421,7 +431,33 @@ function compactSnapshot(snapshot: string): string {
     }
   }
 
-  const result = output.join("\n");
+  // Annotate runs of identical role+name with a ×N count on the last occurrence
+  const annotated: string[] = [];
+  let i = 0;
+  while (i < output.length) {
+    const line = output[i]!;
+    // Strip leading ref prefix to get the element signature
+    const sig = line.replace(/^\[[\w?]+\]\s*/, "");
+    // Count how many consecutive lines share this signature
+    let j = i + 1;
+    while (j < output.length && (output[j] ?? "").replace(/^\[[\w?]+\]\s*/, "") === sig) j++;
+    const count = j - i;
+    if (count >= 2) {
+      // Emit each line unchanged, append ×N only on the last one
+      for (let k = i; k < j - 1; k++) annotated.push(output[k]!);
+      annotated.push(output[j - 1]! + `  (×${count} total)`);
+    } else {
+      annotated.push(line);
+    }
+    i = j;
+  }
+
+  // Hint when images exist
+  if (imgCount > 0) {
+    annotated.push(`[${imgCount} image element${imgCount > 1 ? "s" : ""} — hover with: weblens do <ref> --action hover]`);
+  }
+
+  const result = annotated.join("\n");
   const MAX_CHARS = 10000;
   if (result.length > MAX_CHARS) {
     return result.slice(0, MAX_CHARS) + "\n... (truncated — use `weblens state --full` for complete snapshot)";
@@ -613,7 +649,7 @@ async function handleRequest(req: Request): Promise<Response> {
     }
 
     if (path === "/do" && req.method === "POST") {
-      const body = (await req.json()) as { ref: string; value?: string; key?: string };
+      const body = (await req.json()) as { ref: string; value?: string; key?: string; action?: string };
       const p = await ensurePage();
       networkLog = [];
       previousSnapshot = lastSnapshot;
@@ -629,7 +665,11 @@ async function handleRequest(req: Request): Promise<Response> {
 
       agentActing = true;
       let actionDesc = "click";
-      if (body.value !== undefined) {
+      if (body.action === "hover") {
+        await locator.hover();
+        await new Promise<void>(resolve => setTimeout(resolve, 300));
+        actionDesc = "hover";
+      } else if (body.value !== undefined) {
         // Use selectOption only for real <select> elements, not text inputs with role=combobox
         const tagName = await locator.evaluate((el) => (el as any).tagName.toLowerCase()).catch(() => "");
         if (tagName === "select") {
@@ -665,7 +705,7 @@ async function handleRequest(req: Request): Promise<Response> {
       lastAgentActionUrl = p.url();
       agentActing = false;
 
-      const actionVerb = body.value !== undefined ? "Filled" : "Clicked";
+      const actionVerb = body.action === "hover" ? "Hovered" : body.value !== undefined ? "Filled" : "Clicked";
       logAction("action", `${actionVerb} ${parsed.name ?? body.ref}`);
       broadcastSSE("action", { type: actionDesc, ref: body.ref, name: parsed.name ?? null, url: p.url() });
       broadcastSSE("screenshot", { ts: Date.now() });

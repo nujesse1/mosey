@@ -2,7 +2,8 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import { spawn } from "node:child_process";
 
-const DAEMON_FILE = join(homedir(), ".weblens", "daemon.json");
+const WEBLENS_DIR = process.env.WEBLENS_DIR ?? join(homedir(), ".weblens");
+const DAEMON_FILE = join(WEBLENS_DIR, "daemon.json");
 
 interface DaemonInfo {
   pid: number;
@@ -86,6 +87,15 @@ export async function request(
   if (!res.ok) {
     const err = (data as any).error ?? `HTTP ${res.status}`;
     throw new Error(err);
+  }
+
+  // Print viewer URL to stderr so it's always visible
+  if (path !== "/viewer-url" && path !== "/stop" && path !== "/health") {
+    try {
+      const vr = await fetch(`http://127.0.0.1:${info.port}/viewer-url`, { signal: AbortSignal.timeout(1000) });
+      const v = await vr.json() as any;
+      if (v?.url) process.stderr.write(`\x1b[1;36mviewer: ${v.url}\x1b[0m\n`);
+    } catch {}
   }
 
   return data;
