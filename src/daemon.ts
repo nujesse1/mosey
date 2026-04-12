@@ -613,7 +613,7 @@ async function handleRequest(req: Request): Promise<Response> {
     }
 
     if (path === "/do" && req.method === "POST") {
-      const body = (await req.json()) as { ref: string; value?: string };
+      const body = (await req.json()) as { ref: string; value?: string; key?: string };
       const p = await ensurePage();
       networkLog = [];
       previousSnapshot = lastSnapshot;
@@ -630,8 +630,8 @@ async function handleRequest(req: Request): Promise<Response> {
       agentActing = true;
       let actionDesc = "click";
       if (body.value !== undefined) {
-        // Use selectOption only for real <select> elements (listbox), not text inputs with role=combobox
-        const tagName = await locator.evaluate((el) => (el as HTMLElement).tagName.toLowerCase()).catch(() => "");
+        // Use selectOption only for real <select> elements, not text inputs with role=combobox
+        const tagName = await locator.evaluate((el) => (el as any).tagName.toLowerCase()).catch(() => "");
         if (tagName === "select") {
           await locator.selectOption({ label: body.value });
           actionDesc = "select";
@@ -643,7 +643,23 @@ async function handleRequest(req: Request): Promise<Response> {
         await locator.click();
       }
 
-      await p.waitForTimeout(500);
+      // Press a key after the action if requested (e.g. Enter to submit a form)
+      if (body.key) {
+        await p.keyboard.press(body.key);
+        actionDesc = actionDesc === "click" ? `key:${body.key}` : `${actionDesc}+key:${body.key}`;
+      }
+
+      // Smart wait: race navigation vs 500ms fallback
+      const urlBefore = p.url();
+      await Promise.race([
+        p.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 5000 }).catch(() => null),
+        new Promise<void>(resolve => setTimeout(resolve, 500)),
+      ]);
+      // If navigation started, wait for it to settle
+      if (p.url() !== urlBefore) {
+        await p.waitForLoadState("domcontentloaded").catch(() => null);
+      }
+
       lastSnapshot = await p.ariaSnapshot({ mode: "ai" });
       lastUrl = p.url();
       lastAgentActionUrl = p.url();
@@ -740,6 +756,21 @@ async function handleRequest(req: Request): Promise<Response> {
         }
       } catch {}
       return json(sessions);
+    }
+
+    if (path === "/links" && req.method === "GET") {
+      const filter = url.searchParams.get("q") ?? "";
+      const p = await ensurePage();
+      const links = await p.evaluate((q) => {
+        // runs in browser context — document is available
+        // @ts-ignore
+        const anchors = Array.from(document.querySelectorAll("a[href]")) as any[];
+        return anchors
+          .map((a) => ({ text: (a.innerText ?? "").trim().slice(0, 120).replace(/\s+/g, " "), href: String(a.href) }))
+          .filter((l) => l.href && !l.href.startsWith("javascript"))
+          .filter((l) => !q || l.text.toLowerCase().includes(q) || l.href.toLowerCase().includes(q));
+      }, filter.toLowerCase());
+      return json(links);
     }
 
     if (path === "/stop" && req.method === "POST") {

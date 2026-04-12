@@ -72,9 +72,11 @@ program
   .command("do <ref>")
   .description("Interact with an element by ref ID")
   .option("--value <text>", "Value to type/select")
-  .action(async (ref: string, opts: { value?: string }) => {
+  .option("--key <key>", "Keyboard key to press after action (e.g. Enter, Tab, Escape)")
+  .action(async (ref: string, opts: { value?: string; key?: string }) => {
     const body: any = { ref };
     if (opts.value !== undefined) body.value = opts.value;
+    if (opts.key !== undefined) body.key = opts.key;
     const result = await request("POST", "/do", body);
     console.log(JSON.stringify(result, null, 2));
   });
@@ -132,6 +134,15 @@ program
   .description("Output a prompt snippet describing weblens for LLMs")
   .action(() => {
     console.log(`weblens <url> reads a webpage. weblens do <ref> clicks an element. weblens do <ref> --value "x" types. weblens state re-reads. weblens session list/load/save manages auth.`);
+  });
+
+program
+  .command("links [filter]")
+  .description("List all links on the page, optionally filtered by text or URL")
+  .action(async (filter?: string) => {
+    const path = filter ? `/links?q=${encodeURIComponent(filter)}` : "/links";
+    const result = await request("GET", path);
+    console.log(JSON.stringify(result, null, 2));
   });
 
 program
