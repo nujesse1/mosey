@@ -134,6 +134,19 @@ program
     console.log(`weblens <url> reads a webpage. weblens do <ref> clicks an element. weblens do <ref> --value "x" types. weblens state re-reads. weblens session list/load/save manages auth.`);
   });
 
+program
+  .command("view")
+  .description("Open the live browser mirror viewer (screenshot + activity log)")
+  .option("--no-open", "Print URL only, don't open browser")
+  .action(async (opts: { open: boolean }) => {
+    const data = await request("GET", "/viewer-url") as any;
+    console.log(data.url);
+    if (opts.open !== false) {
+      const openCmd = process.platform === "darwin" ? "open" : "xdg-open";
+      Bun.spawn([openCmd, data.url], { stdio: ["ignore", "ignore", "inherit"] });
+    }
+  });
+
 program.parseAsync(process.argv).catch((err) => {
   console.error(err.message);
   process.exit(1);
