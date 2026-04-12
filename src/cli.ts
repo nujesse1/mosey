@@ -1,15 +1,47 @@
 import { Command } from "commander";
 import { request, setDaemonArgs } from "./client";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
+import { spawnSync } from "node:child_process";
+import { createInterface } from "node:readline";
+
+const MOSEY_DIR = process.env.MOSEY_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), ".mosey");
+const SETUP_SENTINEL = join(MOSEY_DIR, "setup-complete");
+
+async function firstRunSetup(): Promise<void> {
+  if (existsSync(SETUP_SENTINEL)) return;
+  if (!process.stdin.isTTY) return;
+
+  const rl = createInterface({ input: process.stdin, output: process.stderr });
+  const ask = (q: string) => new Promise<string>((r) => rl.question(q, r));
+  process.stderr.write("\n👋 Welcome to mosey.\n");
+  const ans = (await ask("Add mosey instructions to ~/.claude/CLAUDE.md so Claude Code uses it automatically? [Y/n] ")).trim().toLowerCase();
+  rl.close();
+
+  if (ans === "" || ans === "y" || ans === "yes") {
+    const script = join(import.meta.dir, "..", "scripts", "setup-claude.js");
+    spawnSync(process.execPath, [script], { stdio: "inherit" });
+  } else {
+    process.stderr.write("Skipped. Re-run later with: mosey setup\n");
+  }
+
+  mkdirSync(MOSEY_DIR, { recursive: true });
+  writeFileSync(SETUP_SENTINEL, new Date().toISOString());
+  process.stderr.write("\n");
+}
 
 const program = new Command();
 
 program
-  .name("weblens")
-  .version("0.1.0")
-  .description("Web execution CLI for AI agents")
+  .name("mosey")
+  .version("1.0.0")
+  .description("Web CLI for AI agents — navigate and interact with pages via snapshots")
+  .hook("preAction", async () => { await firstRunSetup(); })
   .option("--headless", "Run browser without visible window")
   .argument("[url]", "URL to navigate to and read (shorthand for navigate + state)")
   .action(async (url?: string) => {
+    await firstRunSetup();
     if (!url) {
       program.help();
       return;
@@ -133,9 +165,20 @@ program
 
 program
   .command("describe")
-  .description("Output a prompt snippet describing weblens for LLMs")
+  .description("Output a prompt snippet describing mosey for LLMs")
   .action(() => {
-    console.log(`weblens <url> reads a webpage. weblens do <ref> clicks an element. weblens do <ref> --value "x" types. weblens state re-reads. weblens session list/load/save manages auth.`);
+    console.log(`mosey <url> reads a webpage. mosey do <ref> clicks an element. mosey do <ref> --value "x" types. mosey state re-reads. mosey session list/load/save manages auth.`);
+  });
+
+program
+  .command("setup")
+  .description("(Re-)run the CLAUDE.md wire-up so Claude Code uses mosey automatically")
+  .action(() => {
+    const script = join(import.meta.dir, "..", "scripts", "setup-claude.js");
+    const res = spawnSync(process.execPath, [script], { stdio: "inherit" });
+    mkdirSync(MOSEY_DIR, { recursive: true });
+    writeFileSync(SETUP_SENTINEL, new Date().toISOString());
+    process.exit(res.status ?? 0);
   });
 
 program
@@ -158,6 +201,55 @@ program
       const openCmd = process.platform === "darwin" ? "open" : "xdg-open";
       Bun.spawn([openCmd, data.url], { stdio: ["ignore", "ignore", "inherit"] });
     }
+  });
+
+program
+  .command("tunnel")
+  .description("Expose the viewer publicly via ngrok")
+  .action(async () => {
+    const data = await request("GET", "/viewer-url") as any;
+    const localUrl: string = data.url;
+    const port = new URL(localUrl).port;
+    const token = new URL(localUrl).searchParams.get("token") ?? "";
+
+    // Check ngrok is available
+    const which = Bun.spawnSync(["which", "ngrok"]);
+    if (which.exitCode !== 0) {
+      console.error("ngrok not found. Install it: brew install ngrok");
+      process.exit(1);
+    }
+
+    // Start ngrok
+    const ngrok = Bun.spawn(["ngrok", "http", port, "--log=false"], {
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+
+    // Poll ngrok local API for the public URL
+    let publicUrl = "";
+    for (let i = 0; i < 30; i++) {
+      await Bun.sleep(500);
+      try {
+        const res = await fetch("http://127.0.0.1:4040/api/tunnels", { signal: AbortSignal.timeout(1000) });
+        const json = await res.json() as any;
+        const tunnel = json.tunnels?.find((t: any) => t.proto === "https");
+        if (tunnel?.public_url) { publicUrl = tunnel.public_url; break; }
+      } catch {}
+    }
+
+    if (!publicUrl) {
+      console.error("ngrok failed to start. Is it authenticated? Run: ngrok config add-authtoken <token>");
+      ngrok.kill();
+      process.exit(1);
+    }
+
+    const viewerUrl = `${publicUrl}/viewer?token=${token}`;
+    process.stderr.write(`\x1b[1;36mviewer (public): ${viewerUrl}\x1b[0m\n`);
+    console.log(viewerUrl);
+
+    // Keep alive — ngrok dies when this process exits
+    process.on("SIGINT", () => { ngrok.kill(); process.exit(0); });
+    process.on("SIGTERM", () => { ngrok.kill(); process.exit(0); });
+    await new Promise(() => {}); // wait forever
   });
 
 program.parseAsync(process.argv).catch((err) => {

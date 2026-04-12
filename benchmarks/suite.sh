@@ -153,7 +153,7 @@ for i in "${!TASK_IDS[@]}"; do
   task_id="${TASK_IDS[$i]}"
   category="${TASK_CATEGORIES[$i]}"
   if [ -n "$TASK_FILTER" ]; then
-    [ "$task_id" = "$TASK_FILTER" ] || [ "$category" = "$TASK_FILTER" ] || continue
+    echo ",$TASK_FILTER," | grep -q ",$task_id,\|,$category," || continue
   fi
   total_tasks=$((total_tasks + 1))
 done
@@ -170,7 +170,7 @@ for i in "${!TASK_IDS[@]}"; do
   expected="${TASK_EXPECTEDS[$i]}"
 
   if [ -n "$TASK_FILTER" ]; then
-    [ "$task_id" = "$TASK_FILTER" ] || [ "$category" = "$TASK_FILTER" ] || continue
+    echo ",$TASK_FILTER," | grep -q ",$task_id,\|,$category," || continue
   fi
 
   completed=$((completed + 1))

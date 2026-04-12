@@ -3,9 +3,9 @@ import { mkdir, unlink, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
-const WEBLENS_DIR = process.env.WEBLENS_DIR ?? join(homedir(), ".weblens");
-const DAEMON_FILE = join(WEBLENS_DIR, "daemon.json");
-const SESSIONS_DIR = join(WEBLENS_DIR, "sessions");
+const MOSEY_DIR = process.env.MOSEY_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), ".mosey");
+const DAEMON_FILE = join(MOSEY_DIR, "daemon.json");
+const SESSIONS_DIR = join(MOSEY_DIR, "sessions");
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 
 const headless = process.argv.includes("--headless");
@@ -64,7 +64,7 @@ function checkAuth(req: Request): boolean {
       return [(k ?? "").trim(), v.join("=")];
     })
   );
-  return cookies["weblens-token"] === viewerToken && viewerToken !== "";
+  return cookies["mosey-token"] === viewerToken && viewerToken !== "";
 }
 
 function unauthorized() {
@@ -81,7 +81,7 @@ const AUTH_FORM_HTML = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>weblens viewer</title>
+<title>mosey viewer</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -109,7 +109,7 @@ button:hover { background: #357abd; }
 </head>
 <body>
 <div class="card">
-  <h1>weblens viewer</h1>
+  <h1>mosey viewer</h1>
   <input type="text" id="tok" placeholder="paste token" autofocus />
   <button onclick="go()">Open</button>
 </div>
@@ -130,7 +130,7 @@ const VIEWER_HTML = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>weblens live viewer</title>
+<title>mosey live viewer</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -276,7 +276,7 @@ connect();
 function resetIdleTimer() {
   clearTimeout(idleTimer);
   idleTimer = setTimeout(async () => {
-    console.error("[weblens] idle timeout, shutting down");
+    console.error("[mosey] idle timeout, shutting down");
     await shutdown();
   }, IDLE_TIMEOUT_MS);
 }
@@ -325,10 +325,10 @@ function setupPageListeners(p: Page) {
     if (frame === p.mainFrame()) {
       try {
         await frame.evaluate(() => {
-          (window as any).__weblens = { humanActive: false, lastEvent: null };
+          (window as any).__mosey = { humanActive: false, lastEvent: null };
           const mark = (e: Event) => {
-            (window as any).__weblens.humanActive = true;
-            (window as any).__weblens.lastEvent = e.type;
+            (window as any).__mosey.humanActive = true;
+            (window as any).__mosey.lastEvent = e.type;
           };
           document.addEventListener("mousedown", mark, true);
           document.addEventListener("keydown", mark, true);
@@ -454,13 +454,13 @@ function compactSnapshot(snapshot: string): string {
 
   // Hint when images exist
   if (imgCount > 0) {
-    annotated.push(`[${imgCount} image element${imgCount > 1 ? "s" : ""} — hover with: weblens do <ref> --action hover]`);
+    annotated.push(`[${imgCount} image element${imgCount > 1 ? "s" : ""} — hover with: mosey do <ref> --action hover]`);
   }
 
   const result = annotated.join("\n");
   const MAX_CHARS = 10000;
   if (result.length > MAX_CHARS) {
-    return result.slice(0, MAX_CHARS) + "\n... (truncated — use `weblens state --full` for complete snapshot)";
+    return result.slice(0, MAX_CHARS) + "\n... (truncated — use `mosey state --full` for complete snapshot)";
   }
   return result;
 }
@@ -537,7 +537,7 @@ async function handleRequest(req: Request): Promise<Response> {
           status: 302,
           headers: {
             "Location": "/viewer",
-            "Set-Cookie": `weblens-token=${viewerToken}; Path=/; HttpOnly; SameSite=Strict`,
+            "Set-Cookie": `mosey-token=${viewerToken}; Path=/; HttpOnly; SameSite=Strict`,
           },
         });
       }
@@ -827,7 +827,7 @@ async function handleRequest(req: Request): Promise<Response> {
 // ── Entry point ───────────────────────────────────────────────────────────────
 
 async function main() {
-  await mkdir(WEBLENS_DIR, { recursive: true });
+  await mkdir(MOSEY_DIR, { recursive: true });
   await mkdir(SESSIONS_DIR, { recursive: true });
 
   viewerToken = generateToken();
@@ -856,8 +856,8 @@ async function main() {
   }));
 
   const viewerUrl = `http://127.0.0.1:${server.port}/viewer?token=${viewerToken}`;
-  console.error(`[weblens] daemon started on port ${server.port} (pid ${process.pid})${headless ? " [headless]" : ""}`);
-  console.error(`[weblens] viewer: ${viewerUrl}`);
+  console.error(`[mosey] daemon started on port ${server.port} (pid ${process.pid})${headless ? " [headless]" : ""}`);
+  console.error(`[mosey] viewer: ${viewerUrl}`);
 
   resetIdleTimer();
 
@@ -866,6 +866,12 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("[weblens] daemon failed to start:", err.message);
+  const msg = err?.message ?? String(err);
+  if (/Executable doesn't exist|chrome.*not found|browserType\.launch/i.test(msg)) {
+    console.error("[mosey] Chromium is not installed.");
+    console.error("[mosey] Run: npx playwright install chromium");
+  } else {
+    console.error("[mosey] daemon failed to start:", msg);
+  }
   process.exit(1);
 });

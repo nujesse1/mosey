@@ -1,22 +1,37 @@
 {
-  "name": "weblens",
-  "version": "0.1.0",
-  "module": "src/cli.ts",
+  "name": "scamper",
+  "version": "1.0.0",
+  "description": "Web CLI for AI agents — navigate and interact with pages via snapshots",
+  "license": "MIT",
   "type": "module",
   "bin": {
-    "weblens": "./bin/weblens"
+    "canter": "./bin/canter"
   },
+  "files": [
+    "bin",
+    "src",
+    "scripts",
+    "README.md"
+  ],
+  "keywords": [
+    "ai",
+    "agent",
+    "browser",
+    "playwright",
+    "cli",
+    "claude",
+    "automation"
+  ],
   "scripts": {
-    "postinstall": "bun run scripts/setup-claude.ts"
+    "postinstall": "node scripts/postinstall.js"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^25.6.0"
-  },
-  "peerDependencies": {
+    "@types/node": "^25.6.0",
     "typescript": "^5"
   },
   "dependencies": {
+    "bun": "^1.3.0",
     "commander": "^14.0.3",
     "playwright": "^1.59.1"
   }

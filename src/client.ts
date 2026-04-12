@@ -2,8 +2,8 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import { spawn } from "node:child_process";
 
-const WEBLENS_DIR = process.env.WEBLENS_DIR ?? join(homedir(), ".weblens");
-const DAEMON_FILE = join(WEBLENS_DIR, "daemon.json");
+const MOSEY_DIR = process.env.MOSEY_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), ".mosey");
+const DAEMON_FILE = join(MOSEY_DIR, "daemon.json");
 
 interface DaemonInfo {
   pid: number;
