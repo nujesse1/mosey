@@ -137,7 +137,8 @@ function compactSnapshot(snapshot: string): string {
     if (INTERACTIVE.has(role)) {
       const nameStr = name ? ` "${name.slice(0, 80)}"` : "";
       const refStr = ref ? `[${ref}]` : "[?]";
-      output.push(`${refStr} ${role}${nameStr}`);
+      const checkedStr = trimmed.includes("[checked]") ? " [checked]" : "";
+      output.push(`${refStr} ${role}${nameStr}${checkedStr}`);
       lastUrl = null;
       continue;
     }

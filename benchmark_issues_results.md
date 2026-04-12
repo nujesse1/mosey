@@ -1,5 +1,5 @@
 # Weblens Issue Tests
-Date: Sat Apr 11 20:24:47 PDT 2026
+Date: Sat Apr 11 20:30:53 PDT 2026
 
 {
   "stopped": true
@@ -13,63 +13,68 @@ h1 "Example Domain"
 Daemon warm.
 
 ## form_fill_all
-**Time: 24.0s**
+**Time: 17.9s**
 ```
-Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
-All four text fields filled successfully. Here's every field on the form:
+All four text fields filled. Here's every field on the form:
 
-**Text fields**
-| Ref | Field | Filled value |
-|-----|-------|-------------|
-| e5 | Customer name | `Test User` |
-| e8 | Telephone | `555-1234` |
-| e11 | E-mail address | `test@test.com` |
-| e39 | Preferred delivery time | *(left empty — not requested)* |
-| e42 | Delivery instructions | `Leave at door` |
+**Text inputs**
+| Field | Type | Value filled |
+|---|---|---|
+| Customer name | textbox | `Test User` |
+| Telephone | textbox | `555-1234` |
+| E-mail address | textbox | `test@test.com` |
+| Preferred delivery time | textbox | *(left blank — not in your list)* |
+| Delivery instructions | textbox | `Leave at door` |
 
-**Radio buttons** (Pizza size — mutually exclusive, none selected)
-| Ref | Option |
-|-----|--------|
-| e16 | Small |
-| e19 | Medium |
-| e22 | Large |
+**Radio buttons** (pizza size — mutually exclusive, none pre-selected)
+- Small
+- Medium
+- Large
 
-**Checkboxes** (Toppings — none checked)
-| Ref | Option |
-|-----|--------|
-| e27 | Bacon |
-| e30 | Extra Cheese |
-| e33 | Onion |
-| e36 | Mushroom |
+**Checkboxes** (toppings — none pre-selected)
+- Bacon
+- Extra Cheese
+- Onion
+- Mushroom
 
 **Button**
-| Ref | Label |
-|-----|-------|
-| e44 | Submit order |
+- Submit order
 
-**Total: 14 fields** — 5 textboxes, 3 radio buttons, 4 checkboxes, 1 button.
+That's 14 total form controls: 5 textboxes, 3 radio buttons, 4 checkboxes, and 1 submit button.
 ```
 
 ## search_and_navigate
-**Time: 19.2s**
+**Time: 14.5s**
 ```
-Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
-The first result is **Playwright (software)** — there's no Wikipedia article titled "Playwright browser automation" (it doesn't exist yet), but the top actual search result listed is `Playwright (software)`.
+There's no Wikipedia article with the exact title "Playwright browser automation" — the page doesn't exist. However, the first actual search result is:
+
+**Playwright (software)**
+
+That's the top match, linking to `/wiki/Playwright_(software)`.
 ```
 
 ## json_api
-**Time: 16.5s**
+**Time: 13.2s**
 ```
-Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
-The first 5 Hacker News top story IDs are:
+The first 5 item IDs are:
 
-1. `47732020`
-2. `47735704`
-3. `47735535`
+1. `47735704`
+2. `47735535`
+3. `47732020`
 4. `47733217`
 5. `47733971`
-
-Note: `weblens navigate` renders pages in a browser — for raw JSON APIs, `curl` is the better fit since the browser snapshot doesn't capture the response body directly.
 ```
 
 ## form_radio_checkbox
+**Time: 18.1s**
+```
+All three selections confirmed from the final snapshot:
+
+- **Pizza size:** `Large` [checked]
+- **Toppings:** `Bacon` [checked], `Extra Cheese` [checked]
+```
+
+{
+  "stopped": true
+}
+Done.
