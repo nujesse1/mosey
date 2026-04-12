@@ -1,0 +1,57 @@
+---
+title: Introduction
+description: The web, in focus.
+---
+
+# Weblens
+
+**A web execution CLI for AI agents.** Navigate, read, act, and observe — from bash.
+
+Weblens strips the visual rendering pipeline from the browser and exposes what agents actually need: structured semantic state, actionable elements, and observable changes. No pixels. No screenshots. No wasted compute.
+
+## The Problem
+
+AI agents browse the web through human browsers. This means:
+
+- **Rendering pixels nobody sees** — GPU, layout, paint, compositing for a headless process
+- **Parsing screenshots with vision models** — slow, expensive, lossy
+- **No structured output** — agents reconstruct page meaning from pixel snapshots or bloated DOM trees
+- **No state persistence** — every conversation starts from zero
+
+## The Solution
+
+Weblens is a CLI that talks to a lightweight browser engine. It outputs structured JSON to stdout. It composes with `jq`, `grep`, and pipes. It persists sessions across conversations.
+
+```bash
+$ weblens navigate https://example.com
+{"url":"https://example.com","title":"Example Domain","status":200}
+
+$ weblens state | jq '.tree[].children[]?.name'
+"More information..."
+
+$ weblens do r3
+{"success":true,"action":"click","ref":"r3"}
+```
+
+## Philosophy
+
+Inspired by the [Bitter Lesson](http://www.incompleteideas.net/IncsightId/BitterLesson.html): build the thinnest primitive, let the model be the intelligence.
+
+- **No scaffolding** — no action prediction, no site memory, no knowledge graphs. The model handles reasoning.
+- **CLI-first** — bash is the universal agent interface. Not MCP. Not a custom protocol.
+- **For any agent** — works with Claude, GPT, Gemini, open-source models. It's just a shell command.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="bolt" href="/quickstart">
+    Install and run your first command in 60 seconds.
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+    How the engine and viewer work together.
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/navigate">
+    Full command reference.
+  </Card>
+  <Card title="For Agents" icon="robot" href="/concepts/for-agents">
+    How to integrate weblens into any agent framework.
+  </Card>
+</CardGroup>

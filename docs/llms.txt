@@ -1,0 +1,28 @@
+# Weblens
+
+> A web execution CLI for AI agents. Navigate, read, act, and observe — from bash. No pixels, no screenshots, no wasted compute.
+
+## Docs
+
+- [Quickstart](https://docs.weblens.dev/quickstart.md): Install and first commands
+- [Commands: navigate](https://docs.weblens.dev/commands/navigate.md): Load a URL
+- [Commands: state](https://docs.weblens.dev/commands/state.md): Get semantic tree with ref IDs
+- [Commands: do](https://docs.weblens.dev/commands/do.md): Click, type, select by ref ID
+- [Commands: diff](https://docs.weblens.dev/commands/diff.md): See what changed
+- [Commands: session](https://docs.weblens.dev/commands/session.md): Save/load browser sessions
+- [Architecture](https://docs.weblens.dev/concepts/architecture.md): Engine, CLI, and viewer
+- [Sessions](https://docs.weblens.dev/concepts/sessions.md): Persistent browser state
+- [For Agents](https://docs.weblens.dev/concepts/for-agents.md): Integration guide
+
+## Quick Reference
+
+```
+weblens navigate <url>              # load a page → {url, title, status}
+weblens state                       # semantic tree → {url, title, tree: [...]}
+weblens do <ref> [--value "text"]   # interact → {success, action, ref}
+weblens diff                        # what changed → {changes: [...], network: [...]}
+weblens session save|load|list      # persist browser state
+weblens stop                        # kill background engine
+```
+
+All output is JSON to stdout. Compose with jq, grep, pipes.

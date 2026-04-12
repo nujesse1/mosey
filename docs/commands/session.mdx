@@ -1,0 +1,81 @@
+---
+title: session
+description: Save and restore browser sessions.
+---
+
+```bash
+weblens session save <name>
+weblens session load <name>
+weblens session list
+```
+
+Persist and restore browser state (cookies, storage) across conversations.
+
+## Commands
+
+### save
+
+```bash
+$ weblens session save stripe
+{"saved":true,"name":"stripe","domains":["stripe.com","dashboard.stripe.com"]}
+```
+
+Saves all cookies and storage for the current browser context to `~/.weblens/sessions/<name>/`.
+
+### load
+
+```bash
+$ weblens session load stripe
+{"loaded":true,"name":"stripe"}
+```
+
+Restores cookies and storage from a saved session. Navigate after loading to use the restored auth state.
+
+### list
+
+```bash
+$ weblens session list
+[
+  {"name":"stripe","domains":["stripe.com"],"lastUsed":"2026-04-10T14:30:00Z"},
+  {"name":"github","domains":["github.com"],"lastUsed":"2026-04-08T09:15:00Z"}
+]
+```
+
+Lists all saved sessions with their associated domains and last-used timestamps.
+
+## Examples
+
+```bash
+# Save after logging in
+$ weblens navigate https://stripe.com/login
+$ weblens do r5 --value "user@example.com"
+$ weblens do r6 --value "password123"
+$ weblens do r7  # click login
+$ weblens session save stripe
+
+# Restore in a future conversation
+$ weblens session load stripe
+$ weblens navigate https://dashboard.stripe.com
+# Authenticated automatically via saved cookies
+
+# Check if a session exists for a domain
+$ weblens session list | jq '.[] | select(.domains[] | contains("stripe"))'
+```
+
+## Storage
+
+```
+~/.weblens/sessions/
+├── stripe/
+│   ├── cookies.json    # Browser cookies
+│   ├── storage.json    # localStorage + sessionStorage
+│   └── meta.json       # Domains, timestamps
+└── github/
+    └── ...
+```
+
+## Notes
+
+- Sessions are stored unencrypted on disk — treat them like browser profiles
+- Cookies may expire between saves and loads; verify auth state after loading
+- Loading a session replaces the current browser context's cookies/storage

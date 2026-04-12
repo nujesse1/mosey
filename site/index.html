@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weblens — The web, in focus.</title>
+  <meta name="description" content="A web execution CLI for AI agents. Navigate, read, act, and observe — from bash.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <span class="logo-icon">&#9678;</span> weblens
+      </a>
+      <div class="nav-links">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#commands">Commands</a>
+        <a href="#philosophy">Philosophy</a>
+        <a href="https://github.com/weblens/weblens" class="btn-nav">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-badge">CLI-first &middot; bash-native &middot; for any agent</div>
+    <h1>The web, in focus.</h1>
+    <p class="hero-sub">A web execution CLI for AI agents.<br>Navigate, read, act, and observe — from bash.</p>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span class="terminal-title">weblens</span>
+      </div>
+      <div class="terminal-body">
+        <div class="line">
+          <span class="prompt">$</span>
+          <span class="cmd">weblens navigate https://example.com</span>
+        </div>
+        <div class="line output">{"url":"https://example.com","title":"Example Domain","status":200}</div>
+        <div class="line spacer"></div>
+        <div class="line">
+          <span class="prompt">$</span>
+          <span class="cmd">weblens state | jq '.tree[] | .role, .name'</span>
+        </div>
+        <div class="line output">"banner"</div>
+        <div class="line output">"navigation"</div>
+        <div class="line output">"main"</div>
+        <div class="line output">"More information..."</div>
+        <div class="line spacer"></div>
+        <div class="line">
+          <span class="prompt">$</span>
+          <span class="cmd">weblens do r3</span>
+        </div>
+        <div class="line output">{"success":true,"action":"click","ref":"r3"}</div>
+        <div class="line spacer"></div>
+        <div class="line">
+          <span class="prompt">$</span>
+          <span class="cmd">weblens diff</span>
+        </div>
+        <div class="line output">{"changes":[{"type":"navigation","to":"/more-info"}]}</div>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-value">6</div>
+        <div class="stat-label">commands</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">0</div>
+        <div class="stat-label">screenshots</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">~80</div>
+        <div class="stat-label">tokens per page</div>
+      </div>
+    </div>
+  </header>
+
+  <section id="how-it-works" class="section">
+    <div class="section-inner">
+      <h2>How It Works</h2>
+      <p class="section-sub">Weblens runs a headless browser, strips the visual pipeline, and exposes semantic state as JSON through bash commands.</p>
+
+      <div class="architecture">
+        <div class="arch-box agent">
+          <div class="arch-label">Agent (you)</div>
+          <div class="arch-content">
+            <code>weblens navigate</code>
+            <code>weblens state</code>
+            <code>weblens do</code>
+            <code>weblens diff</code>
+          </div>
+          <div class="arch-footer">bash &middot; JSON &middot; pipes</div>
+        </div>
+
+        <div class="arch-arrow">&rarr;</div>
+
+        <div class="arch-box engine">
+          <div class="arch-label">Engine</div>
+          <div class="arch-content">
+            <div class="arch-item kept">JS execution</div>
+            <div class="arch-item kept">Network</div>
+            <div class="arch-item kept">DOM + A11y tree</div>
+            <div class="arch-item cut">CSS layout</div>
+            <div class="arch-item cut">Compositing</div>
+            <div class="arch-item cut">Rasterization</div>
+          </div>
+          <div class="arch-footer">kept &middot; <span class="strikethrough">removed</span></div>
+        </div>
+
+        <div class="arch-arrow">&rarr;</div>
+
+        <div class="arch-box viewer">
+          <div class="arch-label">Viewer (human)</div>
+          <div class="arch-content">
+            <div class="arch-item">Live page preview</div>
+            <div class="arch-item">Action timeline</div>
+            <div class="arch-item">Click to redirect</div>
+            <div class="arch-item">Approval gates</div>
+          </div>
+          <div class="arch-footer">observe &middot; intervene</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="commands" class="section dark">
+    <div class="section-inner">
+      <h2>Commands</h2>
+      <p class="section-sub">Every command outputs JSON to stdout. Pipe with jq. Compose with unix tools. That's the whole interface.</p>
+
+      <div class="commands-grid">
+        <div class="command-card">
+          <h3><code>navigate &lt;url&gt;</code></h3>
+          <p>Load a page. Auto-starts the engine if it isn't running.</p>
+          <div class="command-example">
+            <code>weblens navigate https://stripe.com/dashboard</code>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <h3><code>state</code></h3>
+          <p>Semantic accessibility tree of the current page. Every element gets a stable ref ID.</p>
+          <div class="command-example">
+            <code>weblens state | jq '.tree'</code>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <h3><code>do &lt;ref&gt;</code></h3>
+          <p>Click, type, or select by ref ID. Pass <code>--value</code> for text input.</p>
+          <div class="command-example">
+            <code>weblens do r7 --value "hello@test.com"</code>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <h3><code>diff</code></h3>
+          <p>What changed since the last action. Structured delta + network requests.</p>
+          <div class="command-example">
+            <code>weblens diff | jq '.network'</code>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <h3><code>session save|load</code></h3>
+          <p>Persist cookies and storage. Resume sessions across conversations.</p>
+          <div class="command-example">
+            <code>weblens session save stripe_prod</code>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <h3><code>describe</code></h3>
+          <p>Emit a ~150 token prompt snippet. Drop it into any agent's system prompt.</p>
+          <div class="command-example">
+            <code>weblens describe >> .claude/CLAUDE.md</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="philosophy" class="section">
+    <div class="section-inner">
+      <h2>Philosophy</h2>
+
+      <div class="philosophy-grid">
+        <div class="phil-card">
+          <div class="phil-icon">&#9881;</div>
+          <h3>The Bitter Lesson</h3>
+          <p>Don't scaffold intelligence into the tool. Build the thinnest primitive. Let the model reason. Every "smart feature" is tech debt that the next model makes obsolete.</p>
+        </div>
+
+        <div class="phil-card">
+          <div class="phil-icon">&#9002;</div>
+          <h3>Bash Is All You Need</h3>
+          <p>The OS is already the agent runtime. MCP reinvents POSIX. We just add one more command to your shell — <code>weblens</code> — and the web becomes another pipe-friendly resource.</p>
+        </div>
+
+        <div class="phil-card">
+          <div class="phil-icon">&#9635;</div>
+          <h3>Shared Window</h3>
+          <p>The viewer isn't translating between agent and human realities. It's a shared window into the same web — where the agent reads structure and the human reads pixels, in real time.</p>
+        </div>
+
+        <div class="phil-card">
+          <div class="phil-icon">&#8645;</div>
+          <h3>Co-pilot, Not Autopilot</h3>
+          <p>The human can click in the viewer at any time. The agent pauses, receives the action as context, and continues. No handoff ceremony. Just shared control.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section dark cta-section">
+    <div class="section-inner">
+      <h2>Get Started</h2>
+      <div class="install-block">
+        <code>git clone https://github.com/weblens/weblens && cd weblens && bun install && bun link</code>
+      </div>
+      <p class="cta-sub">Then just run <code>weblens navigate https://example.com</code></p>
+      <div class="cta-links">
+        <a href="https://github.com/weblens/weblens" class="btn-primary">View on GitHub</a>
+        <a href="/docs" class="btn-secondary">Read the Docs</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <span class="logo-icon">&#9678;</span> weblens
+      <span class="footer-sep">&middot;</span>
+      Open source
+      <span class="footer-sep">&middot;</span>
+      Built for agents, by an agent
+    </div>
+  </footer>
+
+</body>
+</html>

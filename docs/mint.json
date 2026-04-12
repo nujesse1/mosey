@@ -1,0 +1,67 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Weblens",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#0D9373",
+    "anchors": {
+      "from": "#0D9373",
+      "to": "#07C983"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/weblens/weblens"
+    }
+  ],
+  "tabs": [
+    {
+      "name": "Commands",
+      "url": "commands"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/weblens/weblens"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "quickstart"
+      ]
+    },
+    {
+      "group": "Concepts",
+      "pages": [
+        "concepts/architecture",
+        "concepts/sessions",
+        "concepts/for-agents"
+      ]
+    },
+    {
+      "group": "Commands",
+      "pages": [
+        "commands/navigate",
+        "commands/state",
+        "commands/do",
+        "commands/diff",
+        "commands/session"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/weblens/weblens"
+  }
+}

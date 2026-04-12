@@ -1,0 +1,68 @@
+---
+title: do
+description: Interact with an element on the page.
+---
+
+```bash
+weblens do <ref> [--value "text"]
+```
+
+Performs an action on the element identified by its `ref` ID from `weblens state`.
+
+## Parameters
+
+<ParamField path="ref" type="string" required>
+  The ref ID of the element (e.g., `r5`). Get ref IDs from `weblens state`.
+</ParamField>
+
+<ParamField path="--value" type="string">
+  Text to type into an input element. If provided, the action is "type" instead of "click".
+</ParamField>
+
+## Output
+
+```json
+{
+  "success": true,
+  "action": "click",
+  "ref": "r5"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `success` | boolean | Whether the action completed |
+| `action` | string | What was done: `click`, `type`, `select` |
+| `ref` | string | The ref ID that was acted on |
+
+## Examples
+
+```bash
+# Click a button
+$ weblens do r6
+{"success":true,"action":"click","ref":"r6"}
+
+# Type into a text field
+$ weblens do r7 --value "hello@example.com"
+{"success":true,"action":"type","ref":"r7"}
+
+# Click and then check what changed
+$ weblens do r6 && weblens diff
+```
+
+## Action Selection
+
+The action is determined automatically:
+
+| Element Role | Action |
+|---|---|
+| link, button | click |
+| textbox, searchbox | type (requires `--value`) |
+| checkbox, radio | click (toggles) |
+| select, combobox | select (uses `--value` to match option) |
+
+## Notes
+
+- After each action, a new state snapshot is taken automatically (for `weblens diff`)
+- If the action causes navigation, the engine waits for the new page to load
+- If the element is not visible or not actionable, returns an error

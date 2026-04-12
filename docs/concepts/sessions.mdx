@@ -1,0 +1,66 @@
+---
+title: Sessions
+description: Persistent browser state across conversations.
+---
+
+## The Problem
+
+Every time an AI agent starts a new conversation, it loses all browser state — cookies, logins, localStorage. Authentication is the single biggest pain point in agent web browsing.
+
+## How Sessions Work
+
+Weblens sessions persist browser state to disk. Save once, load in any future conversation.
+
+```bash
+# Log into a site (manually or via agent), then save
+$ weblens session save stripe
+{"saved":true,"name":"stripe","domains":["stripe.com","dashboard.stripe.com"]}
+
+# Days later, in a new conversation:
+$ weblens session load stripe
+{"loaded":true,"name":"stripe"}
+
+# You're authenticated again. No re-login needed.
+```
+
+### What Gets Saved
+
+- Cookies (including auth tokens)
+- localStorage
+- sessionStorage
+
+### What Doesn't Get Saved
+
+- Open tabs or page state (navigate fresh after loading)
+- In-memory JavaScript state
+- Network connections
+
+### Storage Location
+
+```
+~/.weblens/sessions/
+├── stripe/
+│   ├── cookies.json
+│   ├── storage.json
+│   └── meta.json        # domains, last used, created
+├── github/
+│   └── ...
+└── ...
+```
+
+## Managing Sessions
+
+```bash
+# List all saved sessions
+$ weblens session list
+[
+  {"name":"stripe","domains":["stripe.com"],"lastUsed":"2026-04-10T..."},
+  {"name":"github","domains":["github.com"],"lastUsed":"2026-04-08T..."}
+]
+```
+
+## Token Expiry
+
+Sessions store cookies as-is. If a cookie expires (e.g., a 24-hour session token), the session will load but you won't be authenticated. The agent should verify auth state after loading and re-authenticate if needed.
+
+This is intentional — weblens doesn't try to refresh tokens or keep sessions alive. That's scaffolding that would be obsoleted by better models.

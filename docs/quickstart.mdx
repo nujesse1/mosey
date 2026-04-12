@@ -1,0 +1,108 @@
+---
+title: Quickstart
+description: Install weblens and run your first commands.
+---
+
+## Install
+
+```bash
+# Clone and link
+git clone https://github.com/weblens/weblens
+cd weblens
+bun install
+bun link
+```
+
+Requires [Bun](https://bun.sh) and a Chromium browser (Playwright installs one automatically).
+
+## Your First Session
+
+### Navigate to a page
+
+```bash
+$ weblens navigate https://news.ycombinator.com
+{"url":"https://news.ycombinator.com","title":"Hacker News","status":200}
+```
+
+The first command auto-starts the background browser engine. No setup needed.
+
+### Read the page state
+
+```bash
+$ weblens state
+```
+
+Returns a JSON accessibility tree with `ref` IDs on every element:
+
+```json
+{
+  "url": "https://news.ycombinator.com",
+  "title": "Hacker News",
+  "tree": [
+    {
+      "ref": "r1", "role": "banner",
+      "children": [
+        {"ref": "r2", "role": "link", "name": "Hacker News", "href": "/"}
+      ]
+    },
+    {
+      "ref": "r3", "role": "main",
+      "children": [
+        {"ref": "r4", "role": "link", "name": "Show HN: Weblens", "href": "..."},
+        {"ref": "r5", "role": "link", "name": "Ask HN: ...", "href": "..."}
+      ]
+    }
+  ]
+}
+```
+
+### Interact with an element
+
+Use the `ref` ID from the state output:
+
+```bash
+$ weblens do r4
+{"success":true,"action":"click","ref":"r4"}
+```
+
+### See what changed
+
+```bash
+$ weblens diff
+{
+  "changes": [
+    {"type": "navigation", "from": "/", "to": "/item?id=12345"},
+    {"type": "added", "ref": "r20", "role": "heading", "name": "Show HN: Weblens"}
+  ]
+}
+```
+
+### Compose with standard tools
+
+```bash
+# Get all link names on the page
+weblens state | jq '[.tree[].children[]? | select(.role=="link") | .name]'
+
+# Navigate and extract title in one pipeline
+weblens navigate https://example.com && weblens state | jq '.title'
+```
+
+### Save a session for later
+
+```bash
+$ weblens session save hackernews
+{"saved":true,"name":"hackernews","domains":["news.ycombinator.com"]}
+
+# In a future conversation:
+$ weblens session load hackernews
+{"loaded":true,"name":"hackernews"}
+```
+
+### Stop the engine
+
+```bash
+$ weblens stop
+{"stopped":true}
+```
+
+The engine also auto-stops after 5 minutes of inactivity.

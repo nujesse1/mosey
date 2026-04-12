@@ -1,0 +1,99 @@
+---
+title: For Agents
+description: How to integrate weblens into any agent framework.
+---
+
+## Discovery
+
+Weblens is designed so that most LLMs can use it without any special configuration. The command names (`navigate`, `state`, `do`, `diff`) are intuitive enough that models guess them correctly from training data.
+
+For agents that haven't seen weblens before, include the output of `weblens describe` in your system prompt:
+
+```bash
+$ weblens describe
+```
+
+This outputs a ~150 token plain-text description of all commands. Paste it into your agent's system prompt or CLAUDE.md file.
+
+## llms.txt
+
+Weblens documentation is available in agent-friendly format at:
+
+```
+https://docs.weblens.dev/llms.txt        # Index with links to doc pages
+https://docs.weblens.dev/llms-full.txt   # All docs concatenated
+```
+
+Any agent with web access can fetch these for the full reference. The `llms.txt` file is under 2K tokens — efficient enough to include in context when needed.
+
+## Usage Patterns
+
+### Basic: Include describe output in system prompt
+
+```
+You have access to `weblens`, a web browsing CLI.
+Commands: navigate <url>, state, do <ref>, diff, session save|load|list <name>, stop.
+All output is JSON to stdout. Pipe with jq.
+```
+
+### Intermediate: Let the agent discover on first use
+
+Don't preload anything. When the agent needs to browse, it runs `weblens describe` and learns the commands. This works well with capable models (Claude, GPT-4, etc.) that can read help text and adapt.
+
+### Advanced: CLAUDE.md integration
+
+Add to your project's `CLAUDE.md`:
+
+```markdown
+## Web Browsing
+
+Use `weblens` for all web browsing tasks. Run `weblens describe` if you need the command reference.
+Sessions are saved in ~/.weblens/sessions/. Load existing sessions before navigating to avoid re-authentication.
+```
+
+## Example: Agent Workflow
+
+```bash
+# 1. Check for existing session
+weblens session list | jq '.[] | select(.domains[] | contains("stripe"))'
+
+# 2. Load if found, navigate fresh if not
+weblens session load stripe 2>/dev/null || weblens navigate https://stripe.com
+
+# 3. Read the page
+weblens state | jq '.tree'
+
+# 4. Take action
+weblens do r5 --value "search query"
+
+# 5. Check results
+weblens diff
+```
+
+## Output Format
+
+Every command outputs JSON to stdout. Errors go to stderr with exit code 1.
+
+```bash
+# Success
+{"url":"https://example.com","title":"Example","status":200}
+
+# Error
+# stderr: Error: Navigation timeout after 30000ms
+# exit code: 1
+```
+
+This means standard shell patterns work:
+
+```bash
+# Conditional on success
+weblens navigate https://example.com && weblens state
+
+# Capture output
+result=$(weblens state)
+
+# Error handling
+if ! weblens do r5; then
+  echo "Action failed" >&2
+fi
+```

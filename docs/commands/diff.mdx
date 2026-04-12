@@ -1,0 +1,63 @@
+---
+title: diff
+description: See what changed since the last snapshot.
+---
+
+```bash
+weblens diff
+```
+
+Compares the current page state to the previous snapshot (taken by `weblens state` or after `weblens do`). Returns a structured delta.
+
+## Output
+
+```json
+{
+  "changes": [
+    {"type": "added", "ref": "r15", "role": "dialog", "name": "Success"},
+    {"type": "changed", "ref": "r7", "prop": "value", "from": "", "to": "user@test.com"},
+    {"type": "removed", "ref": "r12"}
+  ],
+  "network": [
+    {"method": "POST", "url": "/api/signup", "status": 201}
+  ]
+}
+```
+
+## Change Types
+
+| Type | Description |
+|---|---|
+| `added` | New element appeared in the tree |
+| `removed` | Element disappeared from the tree |
+| `changed` | Element property changed (name, value, checked, etc.) |
+| `navigation` | Page URL changed |
+
+## Network Requests
+
+The `network` array captures HTTP requests made since the last snapshot. This tells you what data the page fetched or submitted.
+
+| Field | Type | Description |
+|---|---|---|
+| `method` | string | HTTP method (GET, POST, etc.) |
+| `url` | string | Request URL (path only for same-origin) |
+| `status` | number | HTTP status code |
+
+## Examples
+
+```bash
+# Click a button and see what happened
+$ weblens do r6 && weblens diff
+
+# Check if a specific element appeared
+$ weblens diff | jq '.changes[] | select(.role=="dialog")'
+
+# See what API calls were made
+$ weblens diff | jq '.network[] | select(.method=="POST")'
+```
+
+## Notes
+
+- If no previous snapshot exists, returns all current elements as "added"
+- Each `weblens state` or `weblens do` updates the snapshot baseline
+- Network requests are captured via CDP and cleared on each diff call

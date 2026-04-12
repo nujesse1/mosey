@@ -1,0 +1,53 @@
+---
+title: navigate
+description: Load a URL in the browser engine.
+---
+
+```bash
+weblens navigate <url>
+```
+
+Navigates to the given URL. Auto-starts the daemon if it's not running.
+
+## Parameters
+
+<ParamField path="url" type="string" required>
+  The URL to navigate to. Must include protocol (`https://`).
+</ParamField>
+
+## Output
+
+```json
+{
+  "url": "https://example.com",
+  "title": "Example Domain",
+  "status": 200
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `url` | string | The final URL (after redirects) |
+| `title` | string | Page title |
+| `status` | number | HTTP status code |
+
+## Examples
+
+```bash
+# Basic navigation
+$ weblens navigate https://news.ycombinator.com
+{"url":"https://news.ycombinator.com","title":"Hacker News","status":200}
+
+# Follows redirects
+$ weblens navigate https://github.com/weblens
+{"url":"https://github.com/weblens/weblens","title":"weblens/weblens","status":200}
+
+# Chain with state
+$ weblens navigate https://example.com && weblens state | jq '.tree'
+```
+
+## Notes
+
+- The first `navigate` call auto-starts the browser daemon
+- Waits for the page to finish loading (network idle)
+- If a session is loaded, cookies apply to the navigation

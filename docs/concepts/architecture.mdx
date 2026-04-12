@@ -1,0 +1,65 @@
+---
+title: Architecture
+description: How the engine, CLI, and viewer fit together.
+---
+
+## Overview
+
+Weblens has three layers:
+
+```
+┌─────────────┐         ┌──────────────────┐
+│  CLI         │──HTTP──▶│  Daemon (Engine)  │
+│  weblens ... │         │  Playwright +     │
+│              │◀─JSON───│  Bun.serve()      │
+└─────────────┘         └──────────────────┘
+                                │
+                          ┌─────▼──────┐
+                          │  Chromium   │
+                          │  (headless) │
+                          └────────────┘
+```
+
+### The Engine (Daemon)
+
+A background process running Playwright with headless Chromium. It:
+
+- Launches on the first CLI command (auto-start)
+- Listens on `localhost` with a random port
+- Stores PID and port in `~/.weblens/daemon.json`
+- Auto-stops after 5 minutes of inactivity
+- Manages browser state, page navigation, and session persistence
+
+The engine strips the visual rendering pipeline. Chromium still runs JavaScript, handles network requests, and builds the DOM — but no layout, paint, or compositing reaches the agent. The agent gets structured JSON instead of pixels.
+
+### The CLI (Client)
+
+A thin HTTP client. Each command reads `daemon.json`, sends an HTTP request, prints the JSON response to stdout. That's it.
+
+The CLI is intentionally minimal. It doesn't cache state, doesn't do retries, doesn't interpret results. It's a pipe between your shell and the engine.
+
+### The Viewer (Coming Soon)
+
+A local web app for the human operator. It:
+
+- Opens in your browser
+- Subscribes to the engine's event stream via SSE
+- Shows: current URL, action timeline, page preview with overlays
+- Interactive: click an element to pause the agent and redirect
+- Independent: closing it doesn't affect the agent; opening it late catches up
+
+The viewer is for humans. The CLI is for agents. They share the same engine but never interfere with each other.
+
+## Design Principles
+
+<AccordionGroup>
+  <Accordion title="CLI-first, bash-native">
+    Every command outputs JSON to stdout. Errors go to stderr. Exit codes are meaningful. Everything composes with `jq`, `grep`, and pipes. No SDK required — if you have a shell, you have weblens.
+  </Accordion>
+  <Accordion title="Thinnest possible layer">
+    Following the Bitter Lesson: the engine exposes raw state, not intelligence. No action prediction, no site memory, no knowledge graphs. The model handles reasoning. The engine handles execution.
+  </Accordion>
+  <Accordion title="CDP underneath">
+    Playwright uses Chrome DevTools Protocol. We don't reinvent browser automation — we wrap it in a CLI that agents already know how to use.
+  </Accordion>
+</AccordionGroup>
