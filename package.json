@@ -2,28 +2,28 @@
   "name": "scamper",
   "version": "1.0.0",
   "description": "Web CLI for AI agents — navigate and interact with pages via snapshots",
-  "license": "MIT",
-  "type": "module",
+  "license": "UNLICENSED",
+  "private": false,
   "bin": {
-    "canter": "./bin/canter"
+    "scamper": "./bin/scamper"
   },
+  "binaryRelease": "https://github.com/nujesse1/scamper-releases/releases/download",
   "files": [
     "bin",
-    "src",
     "scripts",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "keywords": [
     "ai",
     "agent",
     "browser",
-    "playwright",
     "cli",
-    "claude",
     "automation"
   ],
   "scripts": {
-    "postinstall": "node scripts/postinstall.js"
+    "postinstall": "node scripts/postinstall.js",
+    "build:binaries": "bash scripts/build-binaries.sh"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -31,8 +31,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "bun": "^1.3.0",
-    "commander": "^14.0.3",
     "playwright": "^1.59.1"
   }
 }

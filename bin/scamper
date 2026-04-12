@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+// Tiny launcher: exec the vendored per-platform binary downloaded by postinstall.
+const { spawnSync } = require("child_process");
+const path = require("path");
+const fs = require("fs");
+
+const pkg = require("../package.json");
+const binName = `${pkg.name}${process.platform === "win32" ? ".exe" : ""}`;
+const bin = path.join(__dirname, "..", "vendor", binName);
+
+if (!fs.existsSync(bin)) {
+  console.error(`[${pkg.name}] binary not found at ${bin}`);
+  console.error(`[${pkg.name}] try: npm install -g ${pkg.name}`);
+  process.exit(1);
+}
+
+const res = spawnSync(bin, process.argv.slice(2), { stdio: "inherit" });
+process.exit(res.status ?? 1);

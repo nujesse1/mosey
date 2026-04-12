@@ -39,9 +39,16 @@ export function setDaemonArgs(args: string[]) {
 }
 
 async function startDaemon(): Promise<DaemonInfo> {
-  const daemonPath = join(import.meta.dir, "daemon.ts");
+  // Spawn ourself with the __daemon__ marker.
+  // - In dev (bun run src/cli.ts): process.execPath = bun, argv[1] = resolved cli.ts path.
+  // - In a compiled binary: process.execPath = the binary, argv[1] = first user arg.
+  const execPath = process.execPath;
+  const isBunDev = /[\\/]bun(\.exe)?$/i.test(execPath);
+  const args = isBunDev
+    ? ["run", process.argv[1]!, "__daemon__", ...daemonArgs]
+    : ["__daemon__", ...daemonArgs];
 
-  const child = spawn("bun", ["run", daemonPath, ...daemonArgs], {
+  const child = spawn(execPath, args, {
     detached: true,
     stdio: "ignore",
   });

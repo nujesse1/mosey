@@ -1,13 +1,56 @@
 import { Command } from "commander";
 import { request, setDaemonArgs } from "./client";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline";
 
-const MOSEY_DIR = process.env.MOSEY_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), ".mosey");
-const SETUP_SENTINEL = join(MOSEY_DIR, "setup-complete");
+// Dispatch: if invoked with the hidden __daemon__ marker, run the daemon instead of the CLI.
+// One compiled binary serves both roles (CLI + detached daemon child).
+if (process.argv.includes("__daemon__")) {
+  await import("./daemon");
+  // daemon.ts self-invokes main() which keeps the event loop alive.
+  // Block forever here so we don't fall through to CLI code below.
+  await new Promise<never>(() => {});
+}
+
+const APP_NAME = "scamper";
+const STATE_DIR = process.env.SCAMPER_DIR ?? process.env.MOSEY_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), `.${APP_NAME}`);
+const SETUP_SENTINEL = join(STATE_DIR, "setup-complete");
+
+const CLAUDE_SENTINEL_OPEN = `<!-- ${APP_NAME}-claude-instructions -->`;
+const CLAUDE_SENTINEL_CLOSE = `<!-- end-${APP_NAME}-claude-instructions -->`;
+const CLAUDE_SECTION = `
+${CLAUDE_SENTINEL_OPEN}
+# ${APP_NAME} browser automation
+Use \`${APP_NAME}\` CLI commands for ALL web browsing and browser automation. Do NOT use \`mcp__claude-in-chrome__*\` or \`mcp__chrome-devtools__*\` MCP tools — prefer ${APP_NAME} instead.
+
+\`\`\`bash
+${APP_NAME} <url>                        # navigate and get page snapshot
+${APP_NAME} do <ref>                     # click/interact with element by ref
+${APP_NAME} do <ref> --value "text"      # type into an element
+${APP_NAME} state                        # get current page state
+${APP_NAME} diff                         # see what changed since last command
+${APP_NAME} session save/load <name>     # persist/restore sessions
+${APP_NAME} stop                         # kill the browser
+\`\`\`
+${CLAUDE_SENTINEL_CLOSE}
+`;
+
+function writeClaudeInstructions(): void {
+  const claudeDir = join(homedir(), ".claude");
+  const claudeMd = join(claudeDir, "CLAUDE.md");
+  try { mkdirSync(claudeDir, { recursive: true }); } catch {}
+  let current = "";
+  try { current = readFileSync(claudeMd, "utf8"); } catch {}
+  if (current.includes(CLAUDE_SENTINEL_OPEN)) {
+    process.stderr.write(`[${APP_NAME}] ${claudeMd} already wired up.\n`);
+    return;
+  }
+  const next = current ? current + "\n" + CLAUDE_SECTION : CLAUDE_SECTION.trimStart();
+  writeFileSync(claudeMd, next);
+  process.stderr.write(`[${APP_NAME}] Added instructions to ${claudeMd}\n`);
+}
 
 async function firstRunSetup(): Promise<void> {
   if (existsSync(SETUP_SENTINEL)) return;
@@ -15,18 +58,17 @@ async function firstRunSetup(): Promise<void> {
 
   const rl = createInterface({ input: process.stdin, output: process.stderr });
   const ask = (q: string) => new Promise<string>((r) => rl.question(q, r));
-  process.stderr.write("\n👋 Welcome to mosey.\n");
-  const ans = (await ask("Add mosey instructions to ~/.claude/CLAUDE.md so Claude Code uses it automatically? [Y/n] ")).trim().toLowerCase();
+  process.stderr.write(`\n👋 Welcome to ${APP_NAME}.\n`);
+  const ans = (await ask(`Add ${APP_NAME} instructions to ~/.claude/CLAUDE.md so Claude Code uses it automatically? [Y/n] `)).trim().toLowerCase();
   rl.close();
 
   if (ans === "" || ans === "y" || ans === "yes") {
-    const script = join(import.meta.dir, "..", "scripts", "setup-claude.js");
-    spawnSync(process.execPath, [script], { stdio: "inherit" });
+    writeClaudeInstructions();
   } else {
-    process.stderr.write("Skipped. Re-run later with: mosey setup\n");
+    process.stderr.write(`Skipped. Re-run later with: ${APP_NAME} setup\n`);
   }
 
-  mkdirSync(MOSEY_DIR, { recursive: true });
+  mkdirSync(STATE_DIR, { recursive: true });
   writeFileSync(SETUP_SENTINEL, new Date().toISOString());
   process.stderr.write("\n");
 }
@@ -34,7 +76,7 @@ async function firstRunSetup(): Promise<void> {
 const program = new Command();
 
 program
-  .name("mosey")
+  .name(APP_NAME)
   .version("1.0.0")
   .description("Web CLI for AI agents — navigate and interact with pages via snapshots")
   .hook("preAction", async () => { await firstRunSetup(); })
@@ -172,13 +214,11 @@ program
 
 program
   .command("setup")
-  .description("(Re-)run the CLAUDE.md wire-up so Claude Code uses mosey automatically")
+  .description(`(Re-)run the CLAUDE.md wire-up so Claude Code uses ${APP_NAME} automatically`)
   .action(() => {
-    const script = join(import.meta.dir, "..", "scripts", "setup-claude.js");
-    const res = spawnSync(process.execPath, [script], { stdio: "inherit" });
-    mkdirSync(MOSEY_DIR, { recursive: true });
+    writeClaudeInstructions();
+    mkdirSync(STATE_DIR, { recursive: true });
     writeFileSync(SETUP_SENTINEL, new Date().toISOString());
-    process.exit(res.status ?? 0);
   });
 
 program
