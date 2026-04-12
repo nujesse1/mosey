@@ -14,8 +14,8 @@ if (process.argv.includes("__daemon__")) {
   await new Promise<never>(() => {});
 }
 
-const APP_NAME = "scamper";
-const STATE_DIR = process.env.SCAMPER_DIR ?? process.env.MOSEY_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), `.${APP_NAME}`);
+const APP_NAME = "mosey";
+const STATE_DIR = process.env.MOSEY_DIR ?? process.env.SCAMPER_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), `.${APP_NAME}`);
 const SETUP_SENTINEL = join(STATE_DIR, "setup-complete");
 
 const CLAUDE_SENTINEL_OPEN = `<!-- ${APP_NAME}-claude-instructions -->`;
@@ -207,9 +207,9 @@ program
 
 program
   .command("describe")
-  .description("Output a prompt snippet describing mosey for LLMs")
+  .description(`Output a prompt snippet describing ${APP_NAME} for LLMs`)
   .action(() => {
-    console.log(`mosey <url> reads a webpage. mosey do <ref> clicks an element. mosey do <ref> --value "x" types. mosey state re-reads. mosey session list/load/save manages auth.`);
+    console.log(`${APP_NAME} <url> reads a webpage. ${APP_NAME} do <ref> clicks an element. ${APP_NAME} do <ref> --value "x" types. ${APP_NAME} state re-reads. ${APP_NAME} session list/load/save manages auth.`);
   });
 
 program

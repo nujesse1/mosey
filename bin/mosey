@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+// Tiny launcher: exec the vendored compiled binary.
+const { spawnSync } = require("child_process");
+const path = require("path");
+const fs = require("fs");
+
+const BIN_NAME = "mosey";
+const bin = path.join(__dirname, "..", "vendor", BIN_NAME + (process.platform === "win32" ? ".exe" : ""));
+
+if (!fs.existsSync(bin)) {
+  console.error(`[mosey] binary not found at ${bin}`);
+  console.error(`[mosey] try: npm install -g mosey-browser`);
+  process.exit(1);
+}
+
+const res = spawnSync(bin, process.argv.slice(2), { stdio: "inherit" });
+process.exit(res.status ?? 1);

@@ -1,30 +1,35 @@
-# scamper
+# mosey-browser
 
 Web CLI for AI agents — navigate and interact with pages via snapshots.
+
+The installed command is `mosey`.
 
 ## Install
 
 ```sh
-npx scamper
+npx mosey-browser
 ```
 
-First run downloads the platform binary (~60 MB) and Chromium (~170 MB via Playwright's postinstall), then prompts to wire up `~/.claude/CLAUDE.md` so Claude Code uses scamper automatically.
-
-For repeated use:
+or for repeated use:
 
 ```sh
-npm install -g scamper
+npm install -g mosey-browser
+mosey https://example.com
 ```
+
+First run also installs Chromium (~170 MB via Playwright's postinstall) and prompts once to add a short block to `~/.claude/CLAUDE.md` so Claude Code uses `mosey` automatically.
+
+macOS Apple Silicon only for now (darwin-arm64). Other platforms TBD.
 
 ## Quick start
 
 ```sh
-scamper https://example.com       # navigate and print snapshot
-scamper do e5                     # click element [e5]
-scamper do e7 --value "hello"     # type into a field
-scamper state                     # re-read current page
-scamper session save my_session   # persist cookies
-scamper stop                      # kill the daemon
+mosey https://example.com         # navigate, print snapshot
+mosey do e5                       # click element [e5]
+mosey do e7 --value "hello"       # type into a field
+mosey state                       # re-read current page
+mosey session save my_session     # persist cookies
+mosey stop                        # kill the daemon
 ```
 
 ## License

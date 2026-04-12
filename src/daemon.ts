@@ -3,7 +3,7 @@ import { mkdir, unlink, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
-const MOSEY_DIR = process.env.MOSEY_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), ".mosey");
+const MOSEY_DIR = process.env.MOSEY_DIR ?? process.env.SCAMPER_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), ".mosey");
 const DAEMON_FILE = join(MOSEY_DIR, "daemon.json");
 const SESSIONS_DIR = join(MOSEY_DIR, "sessions");
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
