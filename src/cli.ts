@@ -89,7 +89,7 @@ program
       return;
     }
     // Default command: navigate + return plain text snapshot
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(url)) {
       url = `https://${url}`;
     }
     if (program.opts().headless) setDaemonArgs(["--headless"]);
@@ -112,7 +112,7 @@ program
   .command("navigate <url>")
   .description("Navigate to a URL and return snapshot")
   .action(async (url: string) => {
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(url)) {
       url = `https://${url}`;
     }
     const result = await request("POST", "/navigate", { url }) as any;
