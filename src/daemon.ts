@@ -1,4 +1,4 @@
-import { chromium, type Browser, type Page, type BrowserContext } from "playwright";
+import { chromium, type Browser, type Page, type BrowserContext } from "patchright";
 import { mkdir, unlink, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";

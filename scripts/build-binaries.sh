@@ -24,7 +24,7 @@ for entry in "${TARGETS[@]}"; do
   echo ">>> building $out"
   bun build --compile \
     --target="$target" \
-    --external chromium-bidi --external electron \
+    --external chromium-bidi --external electron --external playwright-core \
     src/cli.ts \
     --outfile="$OUTDIR/$out"
 
