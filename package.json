@@ -1,6 +1,6 @@
 {
   "name": "mosey-browser",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Web CLI for AI agents — navigate and interact with pages via snapshots",
   "license": "UNLICENSED",
   "private": false,
@@ -31,6 +31,7 @@
   ],
   "dependencies": {
     "commander": "^14.0.3",
+    "mosey-browser": "^1.0.1",
     "patchright": "^1.52.0"
   },
   "devDependencies": {
