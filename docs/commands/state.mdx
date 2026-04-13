@@ -4,10 +4,10 @@ description: Get the semantic tree of the current page.
 ---
 
 ```bash
-weblens state
+mosey state
 ```
 
-Returns the accessibility tree of the current page as structured JSON. Every interactive element gets a `ref` ID that can be used with `weblens do`.
+Returns the accessibility tree of the current page as structured JSON. Every interactive element gets a `ref` ID that can be used with `mosey do`.
 
 ## Output
 
@@ -32,7 +32,7 @@ Returns the accessibility tree of the current page as structured JSON. Every int
 
 | Property | Type | Description |
 |---|---|---|
-| `ref` | string | Stable ID for use with `weblens do` |
+| `ref` | string | Stable ID for use with `mosey do` |
 | `role` | string | ARIA role (link, button, heading, textbox, etc.) |
 | `name` | string | Accessible name (visible text, aria-label) |
 | `value` | string | Current value (for inputs, selects) |
@@ -45,20 +45,20 @@ Returns the accessibility tree of the current page as structured JSON. Every int
 
 ```bash
 # Get full state
-$ weblens state
+$ mosey state
 
 # Extract just link names
-$ weblens state | jq '[.. | select(.role?=="link") | .name]'
+$ mosey state | jq '[.. | select(.role?=="link") | .name]'
 
 # Count interactive elements
-$ weblens state | jq '[.. | select(.role? | IN("link","button","textbox"))] | length'
+$ mosey state | jq '[.. | select(.role? | IN("link","button","textbox"))] | length'
 
 # Find a specific element
-$ weblens state | jq '.. | select(.name?=="Submit")' 
+$ mosey state | jq '.. | select(.name?=="Submit")' 
 ```
 
 ## Notes
 
 - Each call takes a fresh snapshot (reflects current page state)
-- The snapshot is stored internally for use by `weblens diff`
+- The snapshot is stored internally for use by `mosey diff`
 - Empty/decorative nodes are stripped to reduce token count

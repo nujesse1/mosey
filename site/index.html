@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weblens — The web, in focus.</title>
+  <title>Mosey — The web, in focus.</title>
   <meta name="description" content="A web execution CLI for AI agents. Navigate, read, act, and observe — from bash.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,13 +15,13 @@
   <nav>
     <div class="nav-inner">
       <a href="/" class="logo">
-        <span class="logo-icon">&#9678;</span> weblens
+        <span class="logo-icon">&#9678;</span> mosey
       </a>
       <div class="nav-links">
         <a href="#how-it-works">How It Works</a>
         <a href="#commands">Commands</a>
         <a href="#philosophy">Philosophy</a>
-        <a href="https://github.com/weblens/weblens" class="btn-nav">GitHub</a>
+        <a href="https://github.com/mosey/mosey" class="btn-nav">GitHub</a>
       </div>
     </div>
   </nav>
@@ -36,18 +36,18 @@
         <span class="dot red"></span>
         <span class="dot yellow"></span>
         <span class="dot green"></span>
-        <span class="terminal-title">weblens</span>
+        <span class="terminal-title">mosey</span>
       </div>
       <div class="terminal-body">
         <div class="line">
           <span class="prompt">$</span>
-          <span class="cmd">weblens navigate https://example.com</span>
+          <span class="cmd">mosey navigate https://example.com</span>
         </div>
         <div class="line output">{"url":"https://example.com","title":"Example Domain","status":200}</div>
         <div class="line spacer"></div>
         <div class="line">
           <span class="prompt">$</span>
-          <span class="cmd">weblens state | jq '.tree[] | .role, .name'</span>
+          <span class="cmd">mosey state | jq '.tree[] | .role, .name'</span>
         </div>
         <div class="line output">"banner"</div>
         <div class="line output">"navigation"</div>
@@ -56,13 +56,13 @@
         <div class="line spacer"></div>
         <div class="line">
           <span class="prompt">$</span>
-          <span class="cmd">weblens do r3</span>
+          <span class="cmd">mosey do r3</span>
         </div>
         <div class="line output">{"success":true,"action":"click","ref":"r3"}</div>
         <div class="line spacer"></div>
         <div class="line">
           <span class="prompt">$</span>
-          <span class="cmd">weblens diff</span>
+          <span class="cmd">mosey diff</span>
         </div>
         <div class="line output">{"changes":[{"type":"navigation","to":"/more-info"}]}</div>
       </div>
@@ -87,16 +87,16 @@
   <section id="how-it-works" class="section">
     <div class="section-inner">
       <h2>How It Works</h2>
-      <p class="section-sub">Weblens runs a headless browser, strips the visual pipeline, and exposes semantic state as JSON through bash commands.</p>
+      <p class="section-sub">Mosey runs a headless browser, strips the visual pipeline, and exposes semantic state as JSON through bash commands.</p>
 
       <div class="architecture">
         <div class="arch-box agent">
           <div class="arch-label">Agent (you)</div>
           <div class="arch-content">
-            <code>weblens navigate</code>
-            <code>weblens state</code>
-            <code>weblens do</code>
-            <code>weblens diff</code>
+            <code>mosey navigate</code>
+            <code>mosey state</code>
+            <code>mosey do</code>
+            <code>mosey diff</code>
           </div>
           <div class="arch-footer">bash &middot; JSON &middot; pipes</div>
         </div>
@@ -142,7 +142,7 @@
           <h3><code>navigate &lt;url&gt;</code></h3>
           <p>Load a page. Auto-starts the engine if it isn't running.</p>
           <div class="command-example">
-            <code>weblens navigate https://stripe.com/dashboard</code>
+            <code>mosey navigate https://stripe.com/dashboard</code>
           </div>
         </div>
 
@@ -150,7 +150,7 @@
           <h3><code>state</code></h3>
           <p>Semantic accessibility tree of the current page. Every element gets a stable ref ID.</p>
           <div class="command-example">
-            <code>weblens state | jq '.tree'</code>
+            <code>mosey state | jq '.tree'</code>
           </div>
         </div>
 
@@ -158,7 +158,7 @@
           <h3><code>do &lt;ref&gt;</code></h3>
           <p>Click, type, or select by ref ID. Pass <code>--value</code> for text input.</p>
           <div class="command-example">
-            <code>weblens do r7 --value "hello@test.com"</code>
+            <code>mosey do r7 --value "hello@test.com"</code>
           </div>
         </div>
 
@@ -166,7 +166,7 @@
           <h3><code>diff</code></h3>
           <p>What changed since the last action. Structured delta + network requests.</p>
           <div class="command-example">
-            <code>weblens diff | jq '.network'</code>
+            <code>mosey diff | jq '.network'</code>
           </div>
         </div>
 
@@ -174,7 +174,7 @@
           <h3><code>session save|load</code></h3>
           <p>Persist cookies and storage. Resume sessions across conversations.</p>
           <div class="command-example">
-            <code>weblens session save stripe_prod</code>
+            <code>mosey session save stripe_prod</code>
           </div>
         </div>
 
@@ -182,7 +182,7 @@
           <h3><code>describe</code></h3>
           <p>Emit a ~150 token prompt snippet. Drop it into any agent's system prompt.</p>
           <div class="command-example">
-            <code>weblens describe >> .claude/CLAUDE.md</code>
+            <code>mosey describe >> .claude/CLAUDE.md</code>
           </div>
         </div>
       </div>
@@ -203,7 +203,7 @@
         <div class="phil-card">
           <div class="phil-icon">&#9002;</div>
           <h3>Bash Is All You Need</h3>
-          <p>The OS is already the agent runtime. MCP reinvents POSIX. We just add one more command to your shell — <code>weblens</code> — and the web becomes another pipe-friendly resource.</p>
+          <p>The OS is already the agent runtime. MCP reinvents POSIX. We just add one more command to your shell — <code>mosey</code> — and the web becomes another pipe-friendly resource.</p>
         </div>
 
         <div class="phil-card">
@@ -225,11 +225,11 @@
     <div class="section-inner">
       <h2>Get Started</h2>
       <div class="install-block">
-        <code>git clone https://github.com/weblens/weblens && cd weblens && bun install && bun link</code>
+        <code>git clone https://github.com/mosey/mosey && cd mosey && bun install && bun link</code>
       </div>
-      <p class="cta-sub">Then just run <code>weblens navigate https://example.com</code></p>
+      <p class="cta-sub">Then just run <code>mosey navigate https://example.com</code></p>
       <div class="cta-links">
-        <a href="https://github.com/weblens/weblens" class="btn-primary">View on GitHub</a>
+        <a href="https://github.com/mosey/mosey" class="btn-primary">View on GitHub</a>
         <a href="/docs" class="btn-secondary">Read the Docs</a>
       </div>
     </div>
@@ -237,7 +237,7 @@
 
   <footer>
     <div class="footer-inner">
-      <span class="logo-icon">&#9678;</span> weblens
+      <span class="logo-icon">&#9678;</span> mosey
       <span class="footer-sep">&middot;</span>
       Open source
       <span class="footer-sep">&middot;</span>

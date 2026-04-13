@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Weblens",
+  "name": "Mosey",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -18,7 +18,7 @@
   "topbarLinks": [
     {
       "name": "GitHub",
-      "url": "https://github.com/weblens/weblens"
+      "url": "https://github.com/mosey/mosey"
     }
   ],
   "tabs": [
@@ -31,7 +31,7 @@
     {
       "name": "GitHub",
       "icon": "github",
-      "url": "https://github.com/weblens/weblens"
+      "url": "https://github.com/mosey/mosey"
     }
   ],
   "navigation": [
@@ -62,6 +62,6 @@
     }
   ],
   "footerSocials": {
-    "github": "https://github.com/weblens/weblens"
+    "github": "https://github.com/mosey/mosey"
   }
 }

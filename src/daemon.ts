@@ -3,7 +3,7 @@ import { mkdir, unlink, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
-const MOSEY_DIR = process.env.MOSEY_DIR ?? process.env.SCAMPER_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), ".mosey");
+const MOSEY_DIR = process.env.MOSEY_DIR ?? join(homedir(), ".mosey");
 const DAEMON_FILE = join(MOSEY_DIR, "daemon.json");
 const SESSIONS_DIR = join(MOSEY_DIR, "sessions");
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
@@ -672,9 +672,15 @@ async function handleRequest(req: Request): Promise<Response> {
       } else if (body.value !== undefined) {
         // Use selectOption only for real <select> elements, not text inputs with role=combobox
         const tagName = await locator.evaluate((el) => (el as any).tagName.toLowerCase()).catch(() => "");
+        const inputType = tagName === "input"
+          ? await locator.evaluate((el) => (el as any).type?.toLowerCase()).catch(() => "")
+          : "";
         if (tagName === "select") {
           await locator.selectOption({ label: body.value });
           actionDesc = "select";
+        } else if (inputType === "file") {
+          await locator.setInputFiles(body.value);
+          actionDesc = "upload";
         } else {
           await locator.fill(body.value);
           actionDesc = "fill";

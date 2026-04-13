@@ -9,15 +9,15 @@ Every time an AI agent starts a new conversation, it loses all browser state —
 
 ## How Sessions Work
 
-Weblens sessions persist browser state to disk. Save once, load in any future conversation.
+Mosey sessions persist browser state to disk. Save once, load in any future conversation.
 
 ```bash
 # Log into a site (manually or via agent), then save
-$ weblens session save stripe
+$ mosey session save stripe
 {"saved":true,"name":"stripe","domains":["stripe.com","dashboard.stripe.com"]}
 
 # Days later, in a new conversation:
-$ weblens session load stripe
+$ mosey session load stripe
 {"loaded":true,"name":"stripe"}
 
 # You're authenticated again. No re-login needed.
@@ -38,7 +38,7 @@ $ weblens session load stripe
 ### Storage Location
 
 ```
-~/.weblens/sessions/
+~/.mosey/sessions/
 ├── stripe/
 │   ├── cookies.json
 │   ├── storage.json
@@ -52,7 +52,7 @@ $ weblens session load stripe
 
 ```bash
 # List all saved sessions
-$ weblens session list
+$ mosey session list
 [
   {"name":"stripe","domains":["stripe.com"],"lastUsed":"2026-04-10T..."},
   {"name":"github","domains":["github.com"],"lastUsed":"2026-04-08T..."}
@@ -63,4 +63,4 @@ $ weblens session list
 
 Sessions store cookies as-is. If a cookie expires (e.g., a 24-hour session token), the session will load but you won't be authenticated. The agent should verify auth state after loading and re-authenticate if needed.
 
-This is intentional — weblens doesn't try to refresh tokens or keep sessions alive. That's scaffolding that would be obsoleted by better models.
+This is intentional — mosey doesn't try to refresh tokens or keep sessions alive. That's scaffolding that would be obsoleted by better models.

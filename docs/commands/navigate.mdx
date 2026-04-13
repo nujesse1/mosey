@@ -4,7 +4,7 @@ description: Load a URL in the browser engine.
 ---
 
 ```bash
-weblens navigate <url>
+mosey navigate <url>
 ```
 
 Navigates to the given URL. Auto-starts the daemon if it's not running.
@@ -35,15 +35,15 @@ Navigates to the given URL. Auto-starts the daemon if it's not running.
 
 ```bash
 # Basic navigation
-$ weblens navigate https://news.ycombinator.com
+$ mosey navigate https://news.ycombinator.com
 {"url":"https://news.ycombinator.com","title":"Hacker News","status":200}
 
 # Follows redirects
-$ weblens navigate https://github.com/weblens
-{"url":"https://github.com/weblens/weblens","title":"weblens/weblens","status":200}
+$ mosey navigate https://github.com/mosey
+{"url":"https://github.com/mosey/mosey","title":"mosey/mosey","status":200}
 
 # Chain with state
-$ weblens navigate https://example.com && weblens state | jq '.tree'
+$ mosey navigate https://example.com && mosey state | jq '.tree'
 ```
 
 ## Notes

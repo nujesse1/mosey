@@ -1,14 +1,14 @@
 ---
 title: Quickstart
-description: Install weblens and run your first commands.
+description: Install mosey and run your first commands.
 ---
 
 ## Install
 
 ```bash
 # Clone and link
-git clone https://github.com/weblens/weblens
-cd weblens
+git clone https://github.com/mosey/mosey
+cd mosey
 bun install
 bun link
 ```
@@ -20,7 +20,7 @@ Requires [Bun](https://bun.sh) and a Chromium browser (Playwright installs one a
 ### Navigate to a page
 
 ```bash
-$ weblens navigate https://news.ycombinator.com
+$ mosey navigate https://news.ycombinator.com
 {"url":"https://news.ycombinator.com","title":"Hacker News","status":200}
 ```
 
@@ -29,7 +29,7 @@ The first command auto-starts the background browser engine. No setup needed.
 ### Read the page state
 
 ```bash
-$ weblens state
+$ mosey state
 ```
 
 Returns a JSON accessibility tree with `ref` IDs on every element:
@@ -48,7 +48,7 @@ Returns a JSON accessibility tree with `ref` IDs on every element:
     {
       "ref": "r3", "role": "main",
       "children": [
-        {"ref": "r4", "role": "link", "name": "Show HN: Weblens", "href": "..."},
+        {"ref": "r4", "role": "link", "name": "Show HN: Mosey", "href": "..."},
         {"ref": "r5", "role": "link", "name": "Ask HN: ...", "href": "..."}
       ]
     }
@@ -61,18 +61,18 @@ Returns a JSON accessibility tree with `ref` IDs on every element:
 Use the `ref` ID from the state output:
 
 ```bash
-$ weblens do r4
+$ mosey do r4
 {"success":true,"action":"click","ref":"r4"}
 ```
 
 ### See what changed
 
 ```bash
-$ weblens diff
+$ mosey diff
 {
   "changes": [
     {"type": "navigation", "from": "/", "to": "/item?id=12345"},
-    {"type": "added", "ref": "r20", "role": "heading", "name": "Show HN: Weblens"}
+    {"type": "added", "ref": "r20", "role": "heading", "name": "Show HN: Mosey"}
   ]
 }
 ```
@@ -81,27 +81,27 @@ $ weblens diff
 
 ```bash
 # Get all link names on the page
-weblens state | jq '[.tree[].children[]? | select(.role=="link") | .name]'
+mosey state | jq '[.tree[].children[]? | select(.role=="link") | .name]'
 
 # Navigate and extract title in one pipeline
-weblens navigate https://example.com && weblens state | jq '.title'
+mosey navigate https://example.com && mosey state | jq '.title'
 ```
 
 ### Save a session for later
 
 ```bash
-$ weblens session save hackernews
+$ mosey session save hackernews
 {"saved":true,"name":"hackernews","domains":["news.ycombinator.com"]}
 
 # In a future conversation:
-$ weblens session load hackernews
+$ mosey session load hackernews
 {"loaded":true,"name":"hackernews"}
 ```
 
 ### Stop the engine
 
 ```bash
-$ weblens stop
+$ mosey stop
 {"stopped":true}
 ```
 

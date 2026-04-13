@@ -4,15 +4,15 @@ description: Interact with an element on the page.
 ---
 
 ```bash
-weblens do <ref> [--value "text"]
+mosey do <ref> [--value "text"]
 ```
 
-Performs an action on the element identified by its `ref` ID from `weblens state`.
+Performs an action on the element identified by its `ref` ID from `mosey state`.
 
 ## Parameters
 
 <ParamField path="ref" type="string" required>
-  The ref ID of the element (e.g., `r5`). Get ref IDs from `weblens state`.
+  The ref ID of the element (e.g., `r5`). Get ref IDs from `mosey state`.
 </ParamField>
 
 <ParamField path="--value" type="string">
@@ -39,15 +39,15 @@ Performs an action on the element identified by its `ref` ID from `weblens state
 
 ```bash
 # Click a button
-$ weblens do r6
+$ mosey do r6
 {"success":true,"action":"click","ref":"r6"}
 
 # Type into a text field
-$ weblens do r7 --value "hello@example.com"
+$ mosey do r7 --value "hello@example.com"
 {"success":true,"action":"type","ref":"r7"}
 
 # Click and then check what changed
-$ weblens do r6 && weblens diff
+$ mosey do r6 && mosey diff
 ```
 
 ## Action Selection
@@ -63,6 +63,6 @@ The action is determined automatically:
 
 ## Notes
 
-- After each action, a new state snapshot is taken automatically (for `weblens diff`)
+- After each action, a new state snapshot is taken automatically (for `mosey diff`)
 - If the action causes navigation, the engine waits for the new page to load
 - If the element is not visible or not actionable, returns an error

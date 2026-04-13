@@ -3,11 +3,11 @@ title: Introduction
 description: The web, in focus.
 ---
 
-# Weblens
+# Mosey
 
 **A web execution CLI for AI agents.** Navigate, read, act, and observe — from bash.
 
-Weblens strips the visual rendering pipeline from the browser and exposes what agents actually need: structured semantic state, actionable elements, and observable changes. No pixels. No screenshots. No wasted compute.
+Mosey strips the visual rendering pipeline from the browser and exposes what agents actually need: structured semantic state, actionable elements, and observable changes. No pixels. No screenshots. No wasted compute.
 
 ## The Problem
 
@@ -20,16 +20,16 @@ AI agents browse the web through human browsers. This means:
 
 ## The Solution
 
-Weblens is a CLI that talks to a lightweight browser engine. It outputs structured JSON to stdout. It composes with `jq`, `grep`, and pipes. It persists sessions across conversations.
+Mosey is a CLI that talks to a lightweight browser engine. It outputs structured JSON to stdout. It composes with `jq`, `grep`, and pipes. It persists sessions across conversations.
 
 ```bash
-$ weblens navigate https://example.com
+$ mosey navigate https://example.com
 {"url":"https://example.com","title":"Example Domain","status":200}
 
-$ weblens state | jq '.tree[].children[]?.name'
+$ mosey state | jq '.tree[].children[]?.name'
 "More information..."
 
-$ weblens do r3
+$ mosey do r3
 {"success":true,"action":"click","ref":"r3"}
 ```
 
@@ -52,6 +52,6 @@ Inspired by the [Bitter Lesson](http://www.incompleteideas.net/IncsightId/Bitter
     Full command reference.
   </Card>
   <Card title="For Agents" icon="robot" href="/concepts/for-agents">
-    How to integrate weblens into any agent framework.
+    How to integrate mosey into any agent framework.
   </Card>
 </CardGroup>

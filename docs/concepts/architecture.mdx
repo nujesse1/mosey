@@ -5,12 +5,12 @@ description: How the engine, CLI, and viewer fit together.
 
 ## Overview
 
-Weblens has three layers:
+Mosey has three layers:
 
 ```
 ┌─────────────┐         ┌──────────────────┐
 │  CLI         │──HTTP──▶│  Daemon (Engine)  │
-│  weblens ... │         │  Playwright +     │
+│  mosey ... │         │  Playwright +     │
 │              │◀─JSON───│  Bun.serve()      │
 └─────────────┘         └──────────────────┘
                                 │
@@ -26,7 +26,7 @@ A background process running Playwright with headless Chromium. It:
 
 - Launches on the first CLI command (auto-start)
 - Listens on `localhost` with a random port
-- Stores PID and port in `~/.weblens/daemon.json`
+- Stores PID and port in `~/.mosey/daemon.json`
 - Auto-stops after 5 minutes of inactivity
 - Manages browser state, page navigation, and session persistence
 
@@ -54,7 +54,7 @@ The viewer is for humans. The CLI is for agents. They share the same engine but 
 
 <AccordionGroup>
   <Accordion title="CLI-first, bash-native">
-    Every command outputs JSON to stdout. Errors go to stderr. Exit codes are meaningful. Everything composes with `jq`, `grep`, and pipes. No SDK required — if you have a shell, you have weblens.
+    Every command outputs JSON to stdout. Errors go to stderr. Exit codes are meaningful. Everything composes with `jq`, `grep`, and pipes. No SDK required — if you have a shell, you have mosey.
   </Accordion>
   <Accordion title="Thinnest possible layer">
     Following the Bitter Lesson: the engine exposes raw state, not intelligence. No action prediction, no site memory, no knowledge graphs. The model handles reasoning. The engine handles execution.

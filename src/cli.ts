@@ -15,7 +15,7 @@ if (process.argv.includes("__daemon__")) {
 }
 
 const APP_NAME = "mosey";
-const STATE_DIR = process.env.MOSEY_DIR ?? process.env.SCAMPER_DIR ?? process.env.WEBLENS_DIR ?? join(homedir(), `.${APP_NAME}`);
+const STATE_DIR = process.env.MOSEY_DIR ?? join(homedir(), `.${APP_NAME}`);
 const SETUP_SENTINEL = join(STATE_DIR, "setup-complete");
 
 const CLAUDE_SENTINEL_OPEN = `<!-- ${APP_NAME}-claude-instructions -->`;
@@ -93,8 +93,7 @@ program
       url = `https://${url}`;
     }
     if (program.opts().headless) setDaemonArgs(["--headless"]);
-    await request("POST", "/navigate", { url });
-    const result = await request("GET", "/state") as any;
+    const result = await request("POST", "/navigate", { url }) as any;
     console.log(`# ${result.title}`);
     console.log(`# ${result.url}`);
     console.log("");
