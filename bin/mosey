@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-// Tiny launcher: exec the vendored compiled binary.
-const { spawnSync } = require("child_process");
+// Tiny launcher: exec the vendored compiled binary, with a couple of UX wrappers:
+//   - `mosey install-deps`  : download Chromium / run setup (recovery for postinstall failures)
+//   - intercepts stderr to translate "daemon failed to start" into an actionable hint
+const { spawn, spawnSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
@@ -13,5 +15,40 @@ if (!fs.existsSync(bin)) {
   process.exit(1);
 }
 
-const res = spawnSync(bin, process.argv.slice(2), { stdio: "inherit" });
-process.exit(res.status ?? 1);
+const argv = process.argv.slice(2);
+
+// Launcher-handled command: re-run the postinstall steps.
+if (argv[0] === "install-deps" || argv[0] === "install") {
+  spawnSync(bin, ["setup"], { stdio: "inherit" });
+  console.log("Downloading Chromium (~170MB, one-time)…");
+  const r = spawnSync(bin, ["navigate", "about:blank"], { stdio: "inherit", timeout: 10 * 60_000 });
+  spawnSync(bin, ["stop"], { stdio: "ignore" });
+  if (r.status === 0) {
+    console.log("✓ Ready. Try: mosey https://example.com");
+    process.exit(0);
+  } else {
+    console.error("✗ Chromium download failed. Check network and try again.");
+    process.exit(r.status ?? 1);
+  }
+}
+
+// Normal path: spawn binary, capture stderr so we can translate known failure modes.
+const child = spawn(bin, argv, { stdio: ["inherit", "inherit", "pipe"] });
+
+let stderrBuf = "";
+child.stderr.on("data", (chunk) => {
+  process.stderr.write(chunk);
+  stderrBuf += chunk.toString();
+  if (stderrBuf.length > 64 * 1024) stderrBuf = stderrBuf.slice(-32 * 1024);
+});
+
+child.on("exit", (code) => {
+  if (code !== 0 && /daemon failed to start/i.test(stderrBuf)) {
+    process.stderr.write(
+      "\n[mosey] The daemon failed to start. This usually means Chromium isn't installed yet.\n" +
+        "[mosey] Fix: run `mosey install-deps` in a terminal (downloads Chromium ~170MB, one-time), then retry.\n" +
+        "[mosey] AI agent: ask the user to run `mosey install-deps` — do not retry the same command first.\n"
+    );
+  }
+  process.exit(code ?? 1);
+});

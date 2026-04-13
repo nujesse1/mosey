@@ -1,6 +1,0 @@
-task,category,wl_time_s,cr_time_s,wl_cost,cr_cost,wl_turns,cr_turns,wl_input_tok,cr_input_tok,wl_output_tok,cr_output_tok,wl_accuracy,cr_accuracy
-simple_read,Read,5.3,10.2,0,0,2,2,4,4,190,336,1.0,1.0
-table_extract,Read,23.2,58.0,0,0,8,6,12,10,715,1938,1.0,1.0
-wiki_facts,Read,6.6,9.1,0,0,2,2,4,4,217,330,1.0,1.0
-book_price,Read,6.6,8.0,0,0,2,2,4,4,172,223,1.0,1.0
-form_text_multi,Forms,12.9,12.4,0,0,4,3,6,5,482,523,1.0,1.0
